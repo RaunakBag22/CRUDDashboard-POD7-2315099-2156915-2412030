@@ -1,0 +1,90 @@
+{
+  "$schema": "https://claude.ai/code/settings-schema.json",
+  "project": "Project Apex – Intelligent Inventory Hub",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "description": "Block accidental deletion of core files",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"rm\\s+(-rf?\\s+)?src/(types|App|main)\\.tsx?\"; then echo \"BLOCKED: Cannot delete core source files (types.ts, App.tsx, main.tsx). Remove the guard in .claude/settings.json if intentional.\"; exit 1; fi'"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "description": "Auto-lint TypeScript/TSX files after every write",
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"c:/Users/2156915/Desktop/Hackathon Workspace/VibeCoding-CRUD-Dashboard\" && FILE=\"$CLAUDE_FILE_PATH\"; if [[ \"$FILE\" == *.ts || \"$FILE\" == *.tsx ]]; then npx eslint --fix \"$FILE\" 2>&1 | tail -5; fi'"
+          }
+        ]
+      },
+      {
+        "description": "Type-check after editing hook or types",
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"c:/Users/2156915/Desktop/Hackathon Workspace/VibeCoding-CRUD-Dashboard\" && FILE=\"$CLAUDE_FILE_PATH\"; if [[ \"$FILE\" == *types.ts || \"$FILE\" == *useInventory.ts ]]; then npx tsc --noEmit 2>&1 | tail -10; fi'"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "description": "Verify build on agent completion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"c:/Users/2156915/Desktop/Hackathon Workspace/VibeCoding-CRUD-Dashboard\" && npm run build 2>&1 | tail -3'"
+          }
+        ]
+      }
+    ],
+
+    "Notification": [
+      {
+        "description": "Log agent notifications to file for audit trail",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[$(date -Iseconds)] $CLAUDE_NOTIFICATION\" >> \"c:/Users/2156915/Desktop/Hackathon Workspace/VibeCoding-CRUD-Dashboard/.claude/agent.log\"'"
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "description": "Log sub-agent completions",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[$(date -Iseconds)] Sub-agent completed: $CLAUDE_SUBAGENT_TYPE\" >> \"c:/Users/2156915/Desktop/Hackathon Workspace/VibeCoding-CRUD-Dashboard/.claude/agent.log\"'"
+          }
+        ]
+      }
+    ]
+  },
+
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "TodoWrite",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "deny": []
+  }
+}
