@@ -1,1 +1,2 @@
-# CRUDDashboard-POD7-2315099-2156915-2412030
+# VibeCoding-CRUD-Dashboard
+Use the projectbrief.md file to build the application 
